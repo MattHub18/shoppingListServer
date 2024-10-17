@@ -166,7 +166,7 @@ class NotifyView(GenericAPIView):
             "type": "service_account",
             "project_id": os.environ.get("FIREBASE_PROJECT_ID", ""),
             "private_key_id": os.environ.get("FIREBASE_PRIVATE_KEY_ID", ""),
-            "private_key": os.environ.get("FIREBASE_PRIVATE_KEY", ""),
+            "private_key": os.environ.get("FIREBASE_PRIVATE_KEY", "").replace('\\n', '\n'),
             "client_email": "firebase-adminsdk-9expx@" + os.environ.get("FIREBASE_PROJECT_ID",
                                                                         "") + ".iam.gserviceaccount.com",
             "client_id": os.environ.get("FIREBASE_CLIENT_ID", ""),
