@@ -1,1 +1,4 @@
-python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --noinput && gunicorn django_project.wsgi --log-file –
+python3 manage.py makemigrations
+python3 manage.py migrate
+python3 manage.py collectstatic --noinput
+gunicorn django_project.wsgi --log-file
