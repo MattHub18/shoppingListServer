@@ -1,0 +1,5 @@
+/db.sqlite3
+/sl_api/api/migrations/
+.idea
+/.env
+/api/migrations/
