@@ -10,7 +10,7 @@ from django.urls import reverse
 from firebase_admin import credentials, messaging
 from firebase_admin.exceptions import FirebaseError
 from rest_framework.exceptions import NotFound
-from rest_framework.generics import DestroyAPIView, CreateAPIView, ListAPIView, GenericAPIView
+from rest_framework.generics import DestroyAPIView, CreateAPIView, ListAPIView, GenericAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 import requests
@@ -42,6 +42,24 @@ class ShoppingRegisterView(RegisterView):
         except Exception as e:
             return JsonResponse(
                 {"message": f"Failed to create object, {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class UserDataView(RetrieveAPIView):
+    serializer_class = UserSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        try:
+            data = request.user
+            serializer = self.get_serializer(data, many=True)
+            return JsonResponse(
+                {"message": "User retrieved successfully", "data": serializer.data}, status=status.HTTP_200_OK)
+
+        except ObjectDoesNotExist:
+            return JsonResponse({"message": "List not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return JsonResponse(
+                {"message": f"Something went wrong: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ShoppingListListView(ListAPIView):
