@@ -157,6 +157,7 @@ class ItemCreateView(CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         try:
+            super().post(request, args, kwargs)
             users = ShoppingUser.objects.all()
             user = request.user
             for u in users:
