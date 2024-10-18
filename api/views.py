@@ -154,41 +154,13 @@ class ItemDestroyView(DestroyAPIView):
 class ItemCreateView(CreateAPIView):
     serializer_class = ItemSerializer
     permission_classes = (IsAuthenticated,)
-
-    def post(self, request, *args, **kwargs):
-        try:
-            super().post(request, args, kwargs)
-            users = ShoppingUser.objects.all()
-            user = request.user
-            for u in users:
-                if u.notificationId != '' and u.notificationId != user.notificationId:
-                    notify_url = request.build_absolute_uri(reverse('notify'))
-                    lst = ShoppingList.objects.get(id=request.POST['shoppingListId'])
-                    requests.post(notify_url,
-                                  data={'notification_id': u.notificationId, "username": request.user.username,
-                                        'item_name': request.POST['name'], 'list': lst.createdAt},
-                                  headers={'Authorization': f'Bearer {request.auth}'})
-
-            return JsonResponse({"message": "Item created successfully"}, status=status.HTTP_200_OK)
-        except json.JSONDecodeError:
-            return JsonResponse({"message": "Invalid JSON format"}, status=status.HTTP_400_BAD_REQUEST)
-
-        except Exception as e:
-            return JsonResponse(
-                {"message": f"Failed to create list: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-class NotifyView(GenericAPIView):
-    permission_classes = (IsAuthenticated,)
-    # read firebase credentials
     try:
         cred = credentials.Certificate({
             "type": "service_account",
             "project_id": os.environ.get("FIREBASE_PROJECT_ID", ""),
             "private_key_id": os.environ.get("FIREBASE_PRIVATE_KEY_ID", ""),
             "private_key": os.environ.get("FIREBASE_PRIVATE_KEY", "").replace('\\n', '\n'),
-            "client_email": "firebase-adminsdk-9expx@" + os.environ.get("FIREBASE_PROJECT_ID",
-                                                                        "") + ".iam.gserviceaccount.com",
+            "client_email": "firebase-adminsdk-9expx@" + os.environ.get("FIREBASE_PROJECT_ID", "") + ".iam.gserviceaccount.com",
             "client_id": os.environ.get("FIREBASE_CLIENT_ID", ""),
             "auth_uri": "https://accounts.google.com/o/oauth2/auth",
             "token_uri": "https://oauth2.googleapis.com/token",
@@ -205,41 +177,47 @@ class NotifyView(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         try:
-            data = request.POST
+            item = request.data
+            serializer = self.get_serializer(data=item)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            users = ShoppingUser.objects.all()
+            user = request.user
+            for u in users:
+                if u.notificationId != user.notificationId:
+                    if u.notificationId == '':
+                        return JsonResponse({'message': 'Notification id is empty'}, status=status.HTTP_400_BAD_REQUEST)
+                    username = request.user.username
+                    if username == '':
+                        return JsonResponse({'message': 'username is empty'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # check the body of user's call
-            topic = data['notification_id']
-            if topic == '':
-                return JsonResponse({'message': 'Notification id is empty'}, status=status.HTTP_400_BAD_REQUEST)
-            username = data['username']
-            if username == '':
-                return JsonResponse({'message': 'username is empty'}, status=status.HTTP_400_BAD_REQUEST)
+                    item_name = item['name']
+                    if item_name == '':
+                        return JsonResponse({'message': 'item is empty'}, status=status.HTTP_400_BAD_REQUEST)
+                    lst = ShoppingList.objects.get(id=item['shoppingListId'])
+                    if lst == '':
+                        return JsonResponse({'message': 'list is empty'}, status=status.HTTP_400_BAD_REQUEST)
 
-            item_name = data['item_name']
-            if item_name == '':
-                return JsonResponse({'message': 'item is empty'}, status=status.HTTP_400_BAD_REQUEST)
-            lst = data['list']
-            if lst == '':
-                return JsonResponse({'message': 'list is empty'}, status=status.HTTP_400_BAD_REQUEST)
+                    # build notification
 
-            # build notification
-
-            notification = messaging.Notification("List della spesa", f'{username} ha aggiunto {item_name} a {lst}')
-            message = messaging.Message(notification=notification, topic=topic)
-            # try notification
-            try:
-                messaging.send(message)
-            except FirebaseError as f_e:
-                return JsonResponse(
-                    {'message': f'Firebase FCM error occurred: {f_e}'}, status=status.HTTP_502_BAD_GATEWAY)
-            except ValueError as v_e:
-                return JsonResponse(
-                    {'message': f'Some values are wrong: {v_e}'}, status=status.HTTP_406_NOT_ACCEPTABLE)
-
-            return JsonResponse({'message': 'Notified'}, status=status.HTTP_200_OK)
+                    notification = messaging.Notification("List della spesa",
+                                                          f'{username} ha aggiunto {item_name} a {lst.createdAt}')
+                    message = messaging.Message(notification=notification, topic=u.notificationId)
+                    # try notification
+                    try:
+                        messaging.send(message)
+                    except FirebaseError as f_e:
+                        return JsonResponse(
+                            {'message': f'Firebase FCM error occurred: {f_e}'}, status=status.HTTP_502_BAD_GATEWAY)
+                    except ValueError as v_e:
+                        return JsonResponse(
+                            {'message': f'Some values are wrong: {v_e}'}, status=status.HTTP_406_NOT_ACCEPTABLE)
+                    except Exception as e:
+                        return JsonResponse(
+                            {"message": f"Notification error: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return JsonResponse({"message": "Item created successfully"}, status=status.HTTP_200_OK)
         except json.JSONDecodeError:
             return JsonResponse({"message": "Invalid JSON format"}, status=status.HTTP_400_BAD_REQUEST)
-
         except Exception as e:
             return JsonResponse(
-                {"message": f"Failed to create list: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                {"message": f"Failed to create item: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

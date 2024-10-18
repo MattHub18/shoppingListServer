@@ -17,5 +17,4 @@ urlpatterns = [
     path('shopping/retrieve/<str:id>/', ShoppingListRetrieveView.as_view(), name='shopping_retrieve'),
     path('item/create/', ItemCreateView.as_view(), name='item_create'),
     path('item/delete/<str:pk>/', ItemDestroyView.as_view(), name='item_delete'),
-    path('notify/', NotifyView.as_view(), name='notify'),
 ]
