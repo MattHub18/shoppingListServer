@@ -17,7 +17,8 @@ class ItemSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(RegisterSerializer):
+    notificationId = serializers.CharField()
+
     class Meta:
         model = ShoppingUser
-        fields = '__all__'
-        exclude = ['password']
+        fields = ['username', 'email', 'notificationId']

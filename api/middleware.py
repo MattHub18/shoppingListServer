@@ -10,7 +10,6 @@ class CatchAppendSlashErrorMiddleware:
         response = self.get_response(request)
 
         path = request.get_full_path()
-        print(path)
 
         if path[-1] != '/':
             return JsonResponse({"message": "POST request missing trailing slash. Ensure URL ends with a '/'"},
