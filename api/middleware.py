@@ -7,14 +7,13 @@ class CatchAppendSlashErrorMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # Preparation ops
-
-        # Retrieving the response
         response = self.get_response(request)
 
-        # Updating the response
-        if request.method == "POST" and (response.status_code == 404 or response.status_code == 500):
-            return JsonResponse({"status": status.HTTP_400_BAD_REQUEST,
-                                 "message": "POST request missing trailing slash. Ensure URL ends with a '/'"})
+        path = request.get_full_path()
+        print(path)
+
+        if path[-1] != '/':
+            return JsonResponse({"message": "POST request missing trailing slash. Ensure URL ends with a '/'"},
+                                status=status.HTTP_400_BAD_REQUEST)
         # Returning the response
         return response

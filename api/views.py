@@ -35,13 +35,13 @@ class ShoppingRegisterView(RegisterView):
             user.notificationId = request.data.get('notificationId')
             user.save()
 
-            return JsonResponse({'message': 'User created successfully', 'status': status.HTTP_201_CREATED})
+            return JsonResponse({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
         except json.JSONDecodeError:
-            return JsonResponse({"status": status.HTTP_400_BAD_REQUEST, "message": "Invalid JSON format"})
+            return JsonResponse({"message": "Invalid JSON format"}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             return JsonResponse(
-                {"status": status.HTTP_500_INTERNAL_SERVER_ERROR, "message": f"Failed to create object, {e}"})
+                {"message": f"Failed to create object, {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ShoppingListListView(ListAPIView):
@@ -54,14 +54,14 @@ class ShoppingListListView(ListAPIView):
             data = self.get_queryset().all()
             serializer = self.get_serializer(data, many=True)
             return JsonResponse(
-                {"status": status.HTTP_200_OK, "message": "List retrieved successfully", "data": serializer.data})
+                {"message": "List retrieved successfully", "data": serializer.data}, status=status.HTTP_200_OK)
 
         except ObjectDoesNotExist:
-            return JsonResponse({"status": status.HTTP_404_NOT_FOUND, "message": "List not found"})
+            return JsonResponse({"message": "List not found"}, status=status.HTTP_404_NOT_FOUND)
 
         except Exception as e:
             return JsonResponse(
-                {"status": status.HTTP_500_INTERNAL_SERVER_ERROR, "message": f"Something went wrong: {e}"})
+                {"message": f"Something went wrong: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ShoppingListDestroyView(DestroyAPIView):
@@ -73,10 +73,10 @@ class ShoppingListDestroyView(DestroyAPIView):
         try:
             super().destroy(request, args, kwargs)
             return JsonResponse({
-                'message': 'List deleted successfully', 'status': status.HTTP_200_OK})
+                'message': 'List deleted successfully'}, status=status.HTTP_200_OK)
 
         except NotFound:
-            return JsonResponse({'message': 'List not found', 'status': status.HTTP_404_NOT_FOUND})
+            return JsonResponse({'message': 'List not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class ShoppingListCreateView(CreateAPIView):
@@ -86,14 +86,14 @@ class ShoppingListCreateView(CreateAPIView):
     def post(self, request, *args, **kwargs):
         try:
             super().post(request, args, kwargs)
-            return JsonResponse({"status": status.HTTP_200_OK, "message": "List created successfully"})
+            return JsonResponse({"message": "List created successfully"}, status=status.HTTP_200_OK)
 
         except json.JSONDecodeError:
-            return JsonResponse({"status": status.HTTP_400_BAD_REQUEST, "message": "Invalid JSON format"})
+            return JsonResponse({"message": "Invalid JSON format"}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             return JsonResponse(
-                {"status": status.HTTP_500_INTERNAL_SERVER_ERROR, "message": f"Failed to create list: {e}"})
+                {"message": f"Failed to create list: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ShoppingListRetrieveView(ListAPIView):
@@ -108,13 +108,13 @@ class ShoppingListRetrieveView(ListAPIView):
             data = self.get_queryset().all()
             serializer = self.get_serializer(data, many=True)
             return JsonResponse(
-                {"status": status.HTTP_200_OK, "message": "Items retrieved successfully", "data": serializer.data})
+                {"message": "Items retrieved successfully", "data": serializer.data}, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
-            return JsonResponse({"status": status.HTTP_404_NOT_FOUND, "message": "List not found"})
+            return JsonResponse({"message": "List not found"}, status=status.HTTP_404_NOT_FOUND)
 
         except Exception as e:
             return JsonResponse(
-                {"status": status.HTTP_500_INTERNAL_SERVER_ERROR, "message": f"Something went wrong: {e}"})
+                {"message": f"Something went wrong: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ItemDestroyView(DestroyAPIView):
@@ -126,10 +126,10 @@ class ItemDestroyView(DestroyAPIView):
         try:
             super().destroy(request, args, kwargs)
             return JsonResponse({
-                'message': 'Item deleted successfully', 'status': status.HTTP_200_OK})
+                'message': 'Item deleted successfully'}, status=status.HTTP_200_OK)
 
         except NotFound:
-            return JsonResponse({'message': 'Item not found', 'status': status.HTTP_404_NOT_FOUND})
+            return JsonResponse({'message': 'Item not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class ItemCreateView(CreateAPIView):
@@ -149,13 +149,13 @@ class ItemCreateView(CreateAPIView):
                                         'item_name': request.POST['name'], 'list': lst.createdAt},
                                   headers={'Authorization': f'Bearer {request.auth}'})
 
-            return JsonResponse({"status": status.HTTP_200_OK, "message": "Item created successfully"})
+            return JsonResponse({"message": "Item created successfully"}, status=status.HTTP_200_OK)
         except json.JSONDecodeError:
-            return JsonResponse({"status": status.HTTP_400_BAD_REQUEST, "message": "Invalid JSON format"})
+            return JsonResponse({"message": "Invalid JSON format"}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             return JsonResponse(
-                {"status": status.HTTP_500_INTERNAL_SERVER_ERROR, "message": f"Failed to create list: {e}"})
+                {"message": f"Failed to create list: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class NotifyView(GenericAPIView):
@@ -190,17 +190,17 @@ class NotifyView(GenericAPIView):
             # check the body of user's call
             topic = data['notification_id']
             if topic == '':
-                return JsonResponse({'message': 'Notification id is empty', 'status': status.HTTP_400_BAD_REQUEST})
+                return JsonResponse({'message': 'Notification id is empty'}, status=status.HTTP_400_BAD_REQUEST)
             username = data['username']
             if username == '':
-                return JsonResponse({'message': 'username is empty', 'status': status.HTTP_400_BAD_REQUEST})
+                return JsonResponse({'message': 'username is empty'}, status=status.HTTP_400_BAD_REQUEST)
 
             item_name = data['item_name']
             if item_name == '':
-                return JsonResponse({'message': 'item is empty', 'status': status.HTTP_400_BAD_REQUEST})
+                return JsonResponse({'message': 'item is empty'}, status=status.HTTP_400_BAD_REQUEST)
             lst = data['list']
             if lst == '':
-                return JsonResponse({'message': 'list is empty', 'status': status.HTTP_400_BAD_REQUEST})
+                return JsonResponse({'message': 'list is empty'}, status=status.HTTP_400_BAD_REQUEST)
 
             # build notification
 
@@ -211,15 +211,15 @@ class NotifyView(GenericAPIView):
                 messaging.send(message)
             except FirebaseError as f_e:
                 return JsonResponse(
-                    {'message': f'Firebase FCM error occurred: {f_e}', 'status': status.HTTP_502_BAD_GATEWAY})
+                    {'message': f'Firebase FCM error occurred: {f_e}'}, status=status.HTTP_502_BAD_GATEWAY)
             except ValueError as v_e:
                 return JsonResponse(
-                    {'message': f'Some values are wrong: {v_e}', 'status': status.HTTP_406_NOT_ACCEPTABLE})
+                    {'message': f'Some values are wrong: {v_e}'}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-            return JsonResponse({'message': 'Notified', 'status': status.HTTP_200_OK})
+            return JsonResponse({'message': 'Notified'}, status=status.HTTP_200_OK)
         except json.JSONDecodeError:
-            return JsonResponse({"status": status.HTTP_400_BAD_REQUEST, "message": "Invalid JSON format"})
+            return JsonResponse({"message": "Invalid JSON format"}, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             return JsonResponse(
-                {"status": status.HTTP_500_INTERNAL_SERVER_ERROR, "message": f"Failed to create list: {e}"})
+                {"message": f"Failed to create list: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
