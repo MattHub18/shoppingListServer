@@ -43,6 +43,7 @@ class ShoppingRegisterView(RegisterView):
             return JsonResponse(
                 {"message": f"Failed to create object, {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class UserDataView(RetrieveAPIView):
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
@@ -50,7 +51,7 @@ class UserDataView(RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         try:
             data = request.user
-            serializer = self.get_serializer(data, many=True)
+            serializer = self.get_serializer(data)
             return JsonResponse(
                 {"message": "User retrieved successfully", "data": serializer.data}, status=status.HTTP_200_OK)
 
