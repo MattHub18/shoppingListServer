@@ -8,7 +8,6 @@ from .views import *
 
 urlpatterns = [
     path('register/', ShoppingRegisterView.as_view(), name='register'),
-    path('userdata/', UserDataView.as_view(), name='user_data'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('shopping/create/', ShoppingListCreateView.as_view(), name='shopping_create'),
